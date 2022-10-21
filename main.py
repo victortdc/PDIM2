@@ -37,9 +37,17 @@ if __name__ == '__main__':
     cv2.imshow('ImgOriginal', img)
 
     noise = salt_and_paper(img, 5000) #faz o ruido
+    plt.hist(noise.ravel(), bins=25, range=[0, 256], label="SaltyPaper", alpha=.8)
+    plt.title('Histogram for gray scale image')
+    plt.legend()
+    plt.show()
     cv2.imshow('ImgNoise', noise)
 
     img_median = cv2.medianBlur(noise, 5) #aplica o filtro
+    plt.hist(img_median.ravel(), bins=25, range=[0, 256], label="original", alpha=.8)
+    plt.title('Histogram for gray scale image')
+    plt.legend()
+    plt.show()
     cv2.imshow('ImgMediana', img_median)
     cv2.waitKey(0)
 
