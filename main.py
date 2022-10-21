@@ -1,6 +1,7 @@
 import cv2
 import random
 import numpy as np
+from matplotlib import pyplot as plt
 
 def salt_and_paper(imagem, intensidade=1000):
     imagem_ruidosa = imagem.copy() #copia da imagem original
@@ -29,6 +30,10 @@ def salt_and_paper(imagem, intensidade=1000):
 
 if __name__ == '__main__':
     img = cv2.imread("BrainOriginal.png", 0) #abre a imagem
+    plt.hist(img.ravel(), bins=25, range=[0, 256], label="original", alpha=.8)
+    plt.title('Histogram for gray scale image')
+    plt.legend()
+    plt.show()
     cv2.imshow('ImgOriginal', img)
 
     noise = salt_and_paper(img, 5000) #faz o ruido
