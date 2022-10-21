@@ -1,5 +1,4 @@
 import cv2
-import random
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -24,29 +23,36 @@ def calculaPSNR(iOrig, iRuid):
     return np.max(np.log10(((np.max(iOrig) ** 2) / calculaMSE(iOrig, iRuid)))) * 10
 
 
-def salt_and_paper(imagem, intensidade=1000):
+def salt_and_paper(imagem, intensidade=10000):
     imagem_ruidosa = imagem.copy() #copia da imagem original
 
     #dimensoes da imagem
     col, row = imagem_ruidosa.shape
 
     #espalha pixels brancos
-    numero_de_pixels = random.randint(0, intensidade)
+    numero_de_pixels = np.random.randint(0, intensidade)
     for i in range(numero_de_pixels):
-        y_coord = random.randint(0, row - 1)
-        x_coord = random.randint(0, col - 1)
-
+        y_coord = np.random.randint(0, row)
+        x_coord = np.random.randint(0, col)
         imagem_ruidosa[y_coord][x_coord] = 255
 
     #espalha pixels pretos
-    numero_de_pixels = random.randint(0, intensidade)
+    numero_de_pixels = np.random.randint(0, intensidade)
     for i in range(numero_de_pixels):
-        y_coord = random.randint(0, row - 1)
-        x_coord = random.randint(0, col - 1)
-
+        y_coord = np.random.randint(0, row)
+        x_coord = np.random.randint(0, col)
         imagem_ruidosa[y_coord][x_coord] = 0
 
     return normaliza(imagem_ruidosa)
+
+def filtroMediana(img) :
+    aux = np.pad(img.copy(), pad_width=1, mode='constant', constant_values=0)
+    result = img.copy()
+    for i in range(1, aux.shape[0] - 2):
+        for j in range(1, aux.shape[1] - 2):
+            result[i,j] = np.sort([aux[i+1,j], aux[i,j], aux[i-1,j], aux[i+1,j-1], aux[i,j-1], aux[i-1,j-1],  aux[i+1,j+1], aux[i,j+1], aux[i-1,j+1],])[4]
+    
+    return result
 
 
 if __name__ == '__main__':
@@ -70,7 +76,7 @@ if __name__ == '__main__':
 
 
 
-    img_median = cv2.medianBlur(noise, 5) #aplica o filtro
+    img_median = filtroMediana(noise) #aplica o filtro
     """
     plt.hist(img_median.ravel(), bins=25, range=[0, 256], label="original", alpha=.8)
     plt.title('Histogram for gray scale image')
