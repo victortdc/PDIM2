@@ -156,6 +156,6 @@ def f(imagem):
     print(f"PSNR ruidosa: {str(calculaPSNR(imagem_original, ruido))}")
     print(f"PSNR mediana: {str(calculaPSNR(imagem_original, imagem_mediana))}")
     print(f"PSNR highboost: {str(calculaPSNR(imagem_original, imagem_highboost))}")
-    print(f"PSNR highboost(equalizado): {str(calculaPSNR(imagem_original, higboost_equalizado))}\n\n")
+    print(f"PSNR highboost equalizado: {str(calculaPSNR(imagem_original, higboost_equalizado))}\n\n")
 
     plt.show()
