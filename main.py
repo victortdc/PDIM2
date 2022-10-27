@@ -27,6 +27,62 @@ if __name__ == '__main__':
     for ax, col in zip(axs[0], cols):
         ax.set_title(col)
 
+
+    def imhist(im):
+        m, n = im.shape
+        h = [0.0] * 256
+        for i in range(m):
+            for j in range(n):
+                h[im[i, j]] += 1
+        return np.array(h) / (m * n)
+
+
+    def cumsum(h):
+        return [sum(h[:i + 1]) for i in range(len(h))]
+
+
+    def histeq(im):
+        # calculate Histogram
+        h = imhist(im)
+        cdf = np.array(cumsum(h))
+        sk = np.uint8(255 * cdf)
+        s1, s2 = im.shape
+        Y = np.zeros_like(im)
+
+        for i in range(0, s1):
+            for j in range(0, s2):
+                Y[i, j] = sk[im[i, j]]
+        H = imhist(Y)
+
+        return Y, h, H, sk
+
+
+    def histogramEq(test):
+
+        img = imagem_highboost
+        new_img, h, new_h, sk = histeq(img)
+
+        fig = plt.figure()
+        fig.add_subplot(221)
+        plt.plot(h)
+        plt.title('Original histogram')  # original histogram
+
+        fig.add_subplot(222)
+        plt.plot(new_h)
+        plt.title('New histogram')  # hist of eqlauized image
+
+        fig.add_subplot(223)
+        plt.plot(sk)
+        plt.title('Transfer function')  # transfer function
+
+        cv2.imwrite('histogramEq.jpg', new_img)
+        cv2.imshow
+
+    histogramEq(imagem_highboost)
+    file = open("histogramEq.jpg", "rb")
+    image = file.read()
+    new_image = cv2.imread("histogramEq.jpg")
+    print("After: ", new_image.shape[0], " x ", new_image.shape[1], end="\r")
     # print dos PSNR da imagem
     print("PSNR ruidosa:" + str(calculaPSNR(imagem_original, ruido)))
     print("PSNR mediana:" + str(calculaPSNR(imagem_original, imagem_mediana)))
