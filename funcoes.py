@@ -43,46 +43,48 @@ def salt_and_paper(imagem, intensidade_min=6000, intensidade=10000):
     return imagem_ruidosa
 
 
-def filtroPassaAltas(imagem_ruidosa):
+def filtroPassaAltas(imagem_ruidosa, intensidade):
+    mask_size = imagem_ruidosa.shape[0] * imagem_ruidosa.shape[1]
+    w = (mask_size * intensidade) - 1
     masc = np.array([[-1, -1, -1],
-                     [-1, 8, -1],
-                     [-1, -1, -1]], dtype="float")  # passa-alta media
-    return cv2.filter2D(imagem_ruidosa, -1, masc)
+                     [-1, w, -1],
+                     [-1, -1, -1]], dtype="float")  # mascara passa-alta
+    result = imagem_ruidosa.copy()
+    for i in range(1, result.shape[0] - 2) :
+        for j in range(1, result.shape[1] - 2) :
+            result[i,j] = (
+                result[i - 1, j - 1] * masc[0, 0]+
+                result[i - 1, j] * masc[0, 1] +
+                result[i - 1, j + 1]* masc[0, 2] +
+                result[i, j - 1] * masc[1, 0] +
+                result[i, j] * masc[1, 1] +
+                result[i, j + 1] * masc[1, 2] +
+                result[i + 1, j - 1] * masc[2, 0] +
+                result[i + 1, j] * masc[2, 1] +
+                result[i + 1, j + 1] * masc[2, 2]
+            ) / mask_size
+    return result
 
 
-def filtroHighBoost(imagem, intensidade):
-    resultant_image = imagem.copy()
-    for i in range(1, imagem.shape[0] - 1):
-        for j in range(1, imagem.shape[1] - 1):
-            blur_factor = (imagem[i - 1, j - 1] +
-                           imagem[i - 1, j] -
-                           imagem[i - 1, j + 1] +
-                           imagem[i, j - 1] +
-                           imagem[i, j] +
-                           imagem[i, j + 1] +
-                           imagem[i + 1, j + 1] +
-                           imagem[i + 1, j] +
-                           imagem[i + 1, j + 1]) / 9
-            mask = (intensidade - 1) * imagem[i, j] - blur_factor
-            resultant_image[i, j] = imagem[i, j] + mask
-
-    return resultant_image
+def filtroHighBoost(imagem, imagem_ruidosa, intensidade):
+    passaAltas = filtroPassaAltas(imagem_ruidosa, intensidade)
+    #return (intensidade - 1) * imagem.copy() + passaAltas
+    return ((1 + intensidade) * imagem) - (intensidade * imagem_ruidosa)
 
 
 def filtroMediana(image):
-    aux = np.pad(image.copy(), pad_width=1, mode='constant', constant_values=0)
     result = image.copy()
-    for i in range(1, aux.shape[0] - 2):
-        for j in range(1, aux.shape[1] - 2):
+    for i in range(1, result.shape[0] - 2):
+        for j in range(1, result.shape[1] - 2):
             result[i, j] = np.sort(
-                [aux[i + 1, j],
-                 aux[i, j],
-                 aux[i - 1, j],
-                 aux[i + 1, j - 1],
-                 aux[i, j - 1],
-                 aux[i - 1, j - 1],
-                 aux[i + 1, j + 1],
-                 aux[i, j + 1],
-                 aux[i - 1, j + 1]])[4]
-
+                [result[i + 1, j],
+                 result[i, j],
+                 result[i - 1, j],
+                 result[i + 1, j - 1],
+                 result[i, j - 1],
+                 result[i - 1, j - 1],
+                 result[i + 1, j + 1],
+                 result[i, j + 1],
+                 result[i - 1, j + 1]]
+            )[4]
     return result
