@@ -50,23 +50,24 @@ def filtroPassaAltas(imagem_ruidosa, intensidade):
                      [-1, w, -1],
                      [-1, -1, -1]], dtype="float")  # mascara passa-alta
     result = imagem_ruidosa.copy()
-    for i in range(1, result.shape[0] - 2) :
-        for j in range(1, result.shape[1] - 2) :
-            result[i,j] = (
-                result[i - 1, j - 1] * masc[0, 0]+
-                result[i - 1, j] * masc[0, 1] +
-                result[i - 1, j + 1]* masc[0, 2] +
-                result[i, j - 1] * masc[1, 0] +
-                result[i, j] * masc[1, 1] +
-                result[i, j + 1] * masc[1, 2] +
-                result[i + 1, j - 1] * masc[2, 0] +
-                result[i + 1, j] * masc[2, 1] +
-                result[i + 1, j + 1] * masc[2, 2]
-            ) / mask_size
+    for i in range(1, result.shape[0] - 2):
+        for j in range(1, result.shape[1] - 2):
+            result[i, j] = (
+                                   result[i - 1, j - 1] * masc[0, 0] +
+                                   result[i - 1, j] * masc[0, 1] +
+                                   result[i - 1, j + 1] * masc[0, 2] +
+                                   result[i, j - 1] * masc[1, 0] +
+                                   result[i, j] * masc[1, 1] +
+                                   result[i, j + 1] * masc[1, 2] +
+                                   result[i + 1, j - 1] * masc[2, 0] +
+                                   result[i + 1, j] * masc[2, 1] +
+                                   result[i + 1, j + 1] * masc[2, 2]
+                           ) / mask_size
+
     return result
 
 
-def filtroHighBoost(imagem, imagem_ruidosa, intensidade):
+def filtroHighBoost(imagem, intensidade):
     resultant_image = imagem.copy()
     for i in range(1, imagem.shape[0] - 1):
         for j in range(1, imagem.shape[1] - 1):
@@ -100,24 +101,61 @@ def filtroMediana(image):
                  result[i, j + 1],
                  result[i - 1, j + 1]]
             )[4]
+
     return result
 
 
-def imhist(im):
-        h = [0.0] * 256
-        for i in range(im.shape[0]):
-            for j in range(im.shape[1]):
-                h[im[i, j]] += 1
-        return np.array(h) / (im.shape[0] * im.shape[1])
+def imhist(image):
+    h = [0.0] * 256
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            h[image[i, j]] += 1
+
+    return np.array(h) / (image.shape[0] * image.shape[1])
 
 
 def histeq(imagem):
-    im = imagem.copy()
-    h = imhist(im)
+    img = imagem.copy()
+    h = imhist(img)
     cdf = np.cumsum(h)
     sk = cdf * 255
-    Y = np.zeros_like(im)
-    for i in range(im.shape[0]):
-        for j in range(im.shape[1]):
-            Y[i, j] = sk[im[i, j]]
+    Y = np.zeros_like(img)
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            Y[i, j] = sk[img[i, j]]
+
     return Y
+
+
+def f(imagem):
+    imagem_original = cv2.imread(f"imagens/{imagem}.png", 0)  # abre a imagem
+    ruido = salt_and_paper(imagem_original, 5000)  # faz o ruido
+    imagem_mediana = filtroMediana(ruido)  # aplica o filtro da mediana
+    imagem_highboost = filtroHighBoost(imagem_original, 1)  # aplica o filtro do high boost
+    higboost_equalizado = histeq(imagem_highboost)
+
+    # configuração do histograma
+    cols = ['ImgOriginal', 'ImgNoise']
+    imgs = [imagem_original, ruido]
+    fig, axs = plt.subplots(2, 2)
+    for i in range(2):
+        axs[0, i].imshow(imgs[i], cmap='gray')
+        axs[1, i].hist(imgs[i].ravel(), bins=25, range=[0, 256])
+        axs[0, i].set_title(cols[i])
+
+    # configuração do histograma
+    cols = ['ImgMediana', 'ImgHighBoost', 'HighBoostEqualizado']
+    imgs = [imagem_mediana, imagem_highboost, higboost_equalizado]
+    fig, axs = plt.subplots(2, 3)
+    for i in range(3):
+        axs[0, i].imshow(imgs[i], cmap='gray')
+        axs[1, i].hist(imgs[i].ravel(), bins=25, range=[0, 256])
+        axs[0, i].set_title(cols[i])
+
+    # print dos PSNR da imagem
+    print(f"PSNR ruidosa: {str(calculaPSNR(imagem_original, ruido))}")
+    print(f"PSNR mediana: {str(calculaPSNR(imagem_original, imagem_mediana))}")
+    print(f"PSNR highboost: {str(calculaPSNR(imagem_original, imagem_highboost))}")
+    print(f"PSNR highboost(equalizado): {str(calculaPSNR(imagem_original, higboost_equalizado))}\n\n")
+
+    plt.show()
