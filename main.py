@@ -19,5 +19,6 @@ if __name__ == '__main__':
     print("PSNR ruidosa:" + str(calculaPSNR(imagem_original, ruido)))
     print("PSNR mediana:" + str(calculaPSNR(imagem_original, imagem_mediana)))
     print("PSNR highboost:" + str(calculaPSNR(imagem_original, imagem_highboost)))
+    print("PSNR highboost:" + str(calculaPSNR(imagem_original, higboost_equalizado)))
 
     plt.show()

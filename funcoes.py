@@ -87,8 +87,8 @@ def filtroHighBoost(imagem, imagem_ruidosa, intensidade):
 
 def filtroMediana(image):
     result = image.copy()
-    for i in range(1, result.shape[0] - 2):
-        for j in range(1, result.shape[1] - 2):
+    for i in range(1, result.shape[0] - 1):
+        for j in range(1, result.shape[1] - 1):
             result[i, j] = np.sort(
                 [result[i + 1, j],
                  result[i, j],
@@ -100,16 +100,6 @@ def filtroMediana(image):
                  result[i, j + 1],
                  result[i - 1, j + 1]]
             )[4]
-    return result
-
-def equalizaHistograma(imagem) :
-    result  = imagem.copy()
-    cdf = np.cumsum(result)
-    print(cdf)
-    cdf_normalizado = cdf * float(np.max(result)) / max(cdf)
-    for i in range(result.shape[0]):
-        for j in range(result.shape[1]):
-            result[i, j] = cdf_normalizado[i * result.shape[1] + j]
     return result
 
 
