@@ -67,9 +67,22 @@ def filtroPassaAltas(imagem_ruidosa, intensidade):
 
 
 def filtroHighBoost(imagem, imagem_ruidosa, intensidade):
-    passaAltas = filtroPassaAltas(imagem_ruidosa, intensidade)
-    #return (intensidade - 1) * imagem.copy() + passaAltas
-    return ((1 + intensidade) * imagem) - (intensidade * imagem_ruidosa)
+    resultant_image = imagem.copy()
+    for i in range(1, imagem.shape[0] - 1):
+        for j in range(1, imagem.shape[1] - 1):
+            blur_factor = (imagem[i - 1, j - 1] +
+                           imagem[i - 1, j] -
+                           imagem[i - 1, j + 1] +
+                           imagem[i, j - 1] +
+                           imagem[i, j] +
+                           imagem[i, j + 1] +
+                           imagem[i + 1, j + 1] +
+                           imagem[i + 1, j] +
+                           imagem[i + 1, j + 1]) / 9
+            mask = (intensidade - 1) * imagem[i, j] - blur_factor
+            resultant_image[i, j] = imagem[i, j] + mask
+
+    return resultant_image
 
 
 def filtroMediana(image):
@@ -88,3 +101,33 @@ def filtroMediana(image):
                  result[i - 1, j + 1]]
             )[4]
     return result
+
+def equalizaHistograma(imagem) :
+    result  = imagem.copy()
+    cdf = np.cumsum(result)
+    print(cdf)
+    cdf_normalizado = cdf * float(np.max(result)) / max(cdf)
+    for i in range(result.shape[0]):
+        for j in range(result.shape[1]):
+            result[i, j] = cdf_normalizado[i * result.shape[1] + j]
+    return result
+
+
+def imhist(im):
+        h = [0.0] * 256
+        for i in range(im.shape[0]):
+            for j in range(im.shape[1]):
+                h[im[i, j]] += 1
+        return np.array(h) / (im.shape[0] * im.shape[1])
+
+
+def histeq(imagem):
+    im = imagem.copy()
+    h = imhist(im)
+    cdf = np.cumsum(h)
+    sk = cdf * 255
+    Y = np.zeros_like(im)
+    for i in range(im.shape[0]):
+        for j in range(im.shape[1]):
+            Y[i, j] = sk[im[i, j]]
+    return Y

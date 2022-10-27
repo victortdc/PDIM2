@@ -5,12 +5,12 @@ if __name__ == '__main__':
     ruido = salt_and_paper(imagem_original, 5000)  # faz o ruido
     imagem_mediana = filtroMediana(ruido)  # aplica o filtro da mediana
     imagem_highboost = filtroHighBoost(imagem_original, ruido, 1.1)  # aplica o filtro do high boost
-
+    higboost_equalizado = histeq(imagem_highboost)
     # configuração do histograma
-    cols = ['ImgOriginal', 'ImgNoise', 'ImgMediana', 'ImgHighBoost']
-    imgs = [imagem_original, ruido, imagem_mediana, imagem_highboost]
-    fig, axs = plt.subplots(2, 4)
-    for i in range(4):
+    cols = ['ImgOriginal', 'ImgNoise', 'ImgMediana', 'ImgHighBoost', 'HighBoostEqualizado']
+    imgs = [imagem_original, ruido, imagem_mediana, imagem_highboost, higboost_equalizado]
+    fig, axs = plt.subplots(2, 5)
+    for i in range(5):
         axs[0, i].imshow(imgs[i], cmap='gray')
         axs[1, i].hist(imgs[i].ravel(), bins=25, range=[0, 256])
         axs[0, i].set_title(cols[i])

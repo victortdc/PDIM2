@@ -1,4 +1,4 @@
-# MedianaFiltro
+# Mediana/HighBoost Filtro
  M2PDI
 
 pip install opencv-python
