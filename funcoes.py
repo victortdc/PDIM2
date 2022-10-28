@@ -131,8 +131,8 @@ def f(imagem):
     imagem_original = cv2.imread(f"imagens/{imagem}.png", 0)  # abre a imagem
     ruido = salt_and_paper(imagem_original, 5000)  # faz o ruido
     imagem_mediana = filtroMediana(ruido)  # aplica o filtro da mediana
-    imagem_highboost = filtroHighBoost(imagem_original, 1)  # aplica o filtro do high boost
-    higboost_equalizado = histeq(imagem_highboost)
+    imagem_highboost = filtroHighBoost(ruido, 1)  # aplica o filtro do high boost
+    highboost_equalizado = histeq(imagem_highboost)
 
     # configuração do histograma
     cols = ['ImgOriginal', 'ImgNoise']
@@ -145,7 +145,7 @@ def f(imagem):
 
     # configuração do histograma
     cols = ['ImgMediana', 'ImgHighBoost', 'HighBoostEqualizado']
-    imgs = [imagem_mediana, imagem_highboost, higboost_equalizado]
+    imgs = [imagem_mediana, imagem_highboost, highboost_equalizado]
     fig, axs = plt.subplots(2, 3)
     for i in range(3):
         axs[0, i].imshow(imgs[i], cmap='gray')
@@ -156,6 +156,6 @@ def f(imagem):
     print(f"PSNR ruidosa: {str(calculaPSNR(imagem_original, ruido))}")
     print(f"PSNR mediana: {str(calculaPSNR(imagem_original, imagem_mediana))}")
     print(f"PSNR highboost: {str(calculaPSNR(imagem_original, imagem_highboost))}")
-    print(f"PSNR highboost equalizado: {str(calculaPSNR(imagem_original, higboost_equalizado))}\n\n")
+    print(f"PSNR highboost equalizado: {str(calculaPSNR(imagem_original, highboost_equalizado))}\n\n")
 
     plt.show()
