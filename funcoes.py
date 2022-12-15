@@ -2,6 +2,18 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
+def normalize(img, nivel=255.) :
+    _min = np.amin(img)
+    _max = np.amax(img)
+    result = (img - _min) * nivel / (_max - _min)
+    return np.uint8(result)
+
+
+def speckle(img):
+    saida = img.copy()
+    mask = np.random.rand(saida.shape[0],saida.shape[1])
+    return saida * mask
+
 
 def negativo(imagem):
     return 1 - imagem
