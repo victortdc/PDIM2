@@ -73,11 +73,33 @@ def filtroMediana(image):
     return result
 
 
+def contornoThresh(img):
+    # Converte para RGB
+    image = cv2.cvtColor(img.copy(), cv2.COLOR_BGR2RGB)
+    # Converte para escala de cinza
+    gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+    # Cria imagem binária de threshold
+    # , binary = cv.threshold(gray, 50, 255, cv.THRESH_BINARYINV)
+    _, binario = cv2.threshold(gray,0,225,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+    # Encontre os contornos da imagem com threshold
+    contours, hierarchy = cv2.findContours(binario, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    num_contornos = str(len(contours))
+
+    # Plotar contornos
+    contorno = cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
+
+    return binario, contorno, num_contornos
+
+
 def f(imagem):
     imagem_original = cv2.imread(f"imagens/{imagem}.png", 0)  # abre a imagem
     ruido = salt_and_paper(imagem_original, 5000)  # faz o ruido
     edges = cv2.Canny(imagem_original, 100, 200)
     imagem_mediana = filtroMediana(ruido)  # aplica o filtro da mediana
+    binario, bordas, n_bordas = contornoThresh(imagem_original)
 
     # configuração do histograma
     cols = ['ImgOriginal', 'ImgNoise', 'ImgCanny']
@@ -90,10 +112,18 @@ def f(imagem):
 
     # configuração do histograma
     cols = ['mediana', 'medianaCanny']
-    imgs = [imagem_mediana, ruido, edges]
+    imgs = [imagem_mediana, edges]
     fig, axs = plt.subplots(2, 2)
     for i in range(2):
         axs[0, i].imshow(imgs[i], cmap='gray')
+        axs[1, i].hist(imgs[i].ravel(), bins=25, range=[0, 256])
+        axs[0, i].set_title(cols[i])
+
+    cols = ['binario', 'contornada']
+    imgs = [binario, bordas]
+    fig, axs = plt.subplots(2, 2)
+    for i in range(2):
+        axs[0, i].imshow(imgs[i])
         axs[1, i].hist(imgs[i].ravel(), bins=25, range=[0, 256])
         axs[0, i].set_title(cols[i])
 
