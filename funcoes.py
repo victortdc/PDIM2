@@ -130,15 +130,16 @@ def histeq(imagem):
 def f(imagem):
     imagem_original = cv2.imread(f"imagens/{imagem}.png", 0)  # abre a imagem
     ruido = salt_and_paper(imagem_original, 5000)  # faz o ruido
+    edges = cv2.Canny(imagem_original, 100, 200)
     imagem_mediana = filtroMediana(ruido)  # aplica o filtro da mediana
     imagem_highboost = filtroHighBoost(ruido, 1)  # aplica o filtro do high boost
     highboost_equalizado = histeq(imagem_highboost)
 
     # configuração do histograma
-    cols = ['ImgOriginal', 'ImgNoise']
-    imgs = [imagem_original, ruido]
-    fig, axs = plt.subplots(2, 2)
-    for i in range(2):
+    cols = ['ImgOriginal', 'ImgNoise', 'ImgCanny']
+    imgs = [imagem_original, ruido, edges]
+    fig, axs = plt.subplots(2, 3)
+    for i in range(3):
         axs[0, i].imshow(imgs[i], cmap='gray')
         axs[1, i].hist(imgs[i].ravel(), bins=25, range=[0, 256])
         axs[0, i].set_title(cols[i])
