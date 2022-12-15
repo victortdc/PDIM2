@@ -12,7 +12,7 @@ def normalize(img, nivel=255.) :
 def speckle(img):
     saida = img.copy()
     mask = np.random.rand(saida.shape[0],saida.shape[1])
-    return saida * mask
+    return normalize(saida * mask, 255.)
 
 
 def negativo(imagem):
